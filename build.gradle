@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.1'
+    id 'io.spring.dependency-management' version '1.1.5'
+}
+
+allprojects {
+    apply plugin: 'java'
+
+    group = 'com.hodolee.example'
+    version = '1.0.0'
+    sourceCompatibility = '17'
+
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://repository.redisson.org/artifactory/redisson"
+        }
+    }
+}
+
+subprojects {
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    dependencies {
+        implementation 'org.slf4j:slf4j-api'
+        implementation 'ch.qos.logback:logback-classic'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}

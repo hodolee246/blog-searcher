@@ -1,0 +1,4 @@
+rootProject.name = 'circuit-break-example'
+include 'infrastructure'
+include 'presentation'
+
