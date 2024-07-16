@@ -1,0 +1,17 @@
+kakao:
+  key: 88e92474ef68c4e8d97a02aa07777352
+
+naver:
+  clientId: ddEMQzJuBE9jZft8LU63
+  cilentSecret: TTSomaV6A_
+
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3306
+    username: root
+    password: 1234
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
