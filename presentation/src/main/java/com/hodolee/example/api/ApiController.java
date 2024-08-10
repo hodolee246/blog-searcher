@@ -19,7 +19,7 @@ public class ApiController {
     
     @GetMapping("/blog")
     public ResponseEntity<String> getBlog(@RequestParam("query") String query) {
-        return ResponseEntity.ok(blogSearcherService.getNaverBlog(query));
+        return ResponseEntity.ok(blogSearcherService.getKakaoBlog(query));
     }
     
 }

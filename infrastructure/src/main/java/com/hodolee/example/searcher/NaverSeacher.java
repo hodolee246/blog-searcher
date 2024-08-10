@@ -16,16 +16,17 @@ import java.util.Map;
 @Component
 public class NaverSeacher {
 
-    private final String apiURL = "https://openapi.naver.com/v1/search/blog?query=";
+    @Value("${blog.search.naver.apiUri}")
+    private String apiUri;
 
-    @Value("naver.clientId")
+    @Value("${blog.search.naver.clientId}")
     private String clientId;
 
-    @Value("naver.clientSecret")
+    @Value("${blog.search.naver.clientSecret}")
     private String clientSecret;
 
     public String getBlogData(String query) {
-        String url = apiURL + query;
+        String url = apiUri + "?query=" + query;
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("X-Naver-Client-Id", clientId);
         requestHeaders.put("X-Naver-Client-Secret", clientSecret);

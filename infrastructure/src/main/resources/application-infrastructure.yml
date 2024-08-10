@@ -1,7 +1,4 @@
 spring:
-  profiles:
-    default: local
-
   datasource:
     url: jdbc:h2:./circuit
     driver-class-name: org.h2.Driver
@@ -20,3 +17,14 @@ spring:
   h2:
     console:
       enabled: true
+
+blog:
+  search:
+    kakao:
+      apiUri: https://dapi.kakao.com/v2/search/blog
+      apiKey: 88e92474ef68c4e8d97a02aa07777352
+
+    naver:
+      apiUri: https://openapi.naver.com/v1/search/blog.json
+      clientId: ddEMQzJuBE9jZft8LU63
+      clientSecret: TTSomaV6A_

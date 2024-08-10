@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 public class PresentationApplication {
 
     public static void main(String[] args) {
+        System.setProperty("spring.config.name", "application-infrastructure");
         SpringApplication.run(PresentationApplication.class, args);
     }
 

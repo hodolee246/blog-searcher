@@ -11,13 +11,14 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class KakaoSearcher {
 
-    private final String apiURL = "https://dapi.kakao.com/v2/search/blog?query=";
+    @Value("${blog.search.kakao.apiUri}")
+    private String apiUri;
 
-    @Value("kakao.key")
+    @Value("${blog.search.kakao.apiKey}")
     private String apiKey;
 
     public String getBlogData(String query) {
-        String url = apiURL + query;
+        String url = apiUri + "?query=" + query;
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, "KakaoAK " + apiKey);
         return get(url, headers);
