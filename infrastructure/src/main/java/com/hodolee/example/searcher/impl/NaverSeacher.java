@@ -1,4 +1,4 @@
-package com.hodolee.example.searcher;
+package com.hodolee.example.searcher.impl;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

@@ -14,21 +14,21 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class SearchHistory {
+public class SearchHistory extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    private String searchType;
+    private String keyword;
 
-    private LocalDateTime searchDate;
+    private int count;
 
     @Builder
-    public SearchHistory(Long idx, String searchType, LocalDateTime searchDate) {
+    public SearchHistory(Long idx, String keyword, int count) {
         this.idx = idx;
-        this.searchType = searchType;
-        this.searchDate = searchDate;
+        this.keyword = keyword;
+        this.count = count;
     }
 
 }

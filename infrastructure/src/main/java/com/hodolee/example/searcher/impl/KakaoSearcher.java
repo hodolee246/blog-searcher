@@ -1,16 +1,22 @@
-package com.hodolee.example.searcher;
+package com.hodolee.example.searcher.impl;
 
 import com.hodolee.example.dto.BlogSearchDto;
+import com.hodolee.example.searcher.BlogSearcher;
+import com.hodolee.example.searcher.dto.ApiResponseDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 
 @Component
-public class KakaoSearcher {
+public class KakaoSearcher implements BlogSearcher {
 
     @Value("${blog.search.kakao.apiUri}")
     private String apiUri;
@@ -18,13 +24,27 @@ public class KakaoSearcher {
     @Value("${blog.search.kakao.apiKey}")
     private String apiKey;
 
-    public String getBlogData(BlogSearchDto blogSearchDto) {
-        String url = apiUri + "?query=" + blogSearchDto.query()
-                + "&sort=" + blogSearchDto.sort()
-                + "&size=" + blogSearchDto.page();
+    public ApiResponseDto searchBlog(String query, String sort, Integer page) {
+        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(apiUri)
+                .queryParam("query", query)
+                .queryParam("sort", sort)
+                .queryParam("page", page)
+                .build();
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, "KakaoAK " + apiKey);
-        return get(url, headers);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.exchange(
+                    uriComponents.encode().toUri(),
+                    HttpMethod.GET,
+                    entity,
+                    String.class);
+            return new ApiResponseDto();
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     private String get(String apiUrl, HttpHeaders headers) {

@@ -1,23 +1,23 @@
 package com.hodolee.example.service;
 
-import com.hodolee.example.searcher.KakaoSearcher;
-import com.hodolee.example.searcher.NaverSeacher;
+import com.hodolee.example.dto.BlogSearchDto;
+import com.hodolee.example.searcher.BlogSearcher;
+import com.hodolee.example.searcher.dto.ApiResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class BlogSearcherService {
 
-    private final KakaoSearcher kakaoSearcher;
-    private final NaverSeacher naverSearcher;
+    private final BlogSearcher blogSearcher;
 
-    public String getNaverBlog(String query) {
-        return naverSearcher.getBlogData(query);
+    public BlogSearcherService(@Qualifier("kakaoSearcher") BlogSearcher blogSearcher) {
+        this.blogSearcher = blogSearcher;
     }
 
-    public String getKakaoBlog(String query) {
-        return kakaoSearcher.getBlogData(query);
+    public ApiResponseDto getBlog(BlogSearchDto blogSearchDto) {
+        return blogSearcher.searchBlog(blogSearchDto.query(), blogSearchDto.sort(), blogSearchDto.page());
     }
 
 }
