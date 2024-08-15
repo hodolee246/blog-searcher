@@ -1,5 +1,6 @@
 package com.hodolee.example.searcher;
 
+import com.hodolee.example.dto.BlogSearchDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,8 +18,10 @@ public class KakaoSearcher {
     @Value("${blog.search.kakao.apiKey}")
     private String apiKey;
 
-    public String getBlogData(String query) {
-        String url = apiUri + "?query=" + query;
+    public String getBlogData(BlogSearchDto blogSearchDto) {
+        String url = apiUri + "?query=" + blogSearchDto.query()
+                + "&sort=" + blogSearchDto.sort()
+                + "&size=" + blogSearchDto.page();
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, "KakaoAK " + apiKey);
         return get(url, headers);
