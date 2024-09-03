@@ -36,12 +36,14 @@ public class KakaoSearcher implements BlogSearcher {
 
         try {
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> response = restTemplate.exchange(
+            ResponseEntity<String> apiResponse = restTemplate.exchange(
                     uriComponents.encode().toUri(),
                     HttpMethod.GET,
                     entity,
                     String.class);
-            return new ApiResponseDto();
+            ApiResponseDto response = new ApiResponseDto();
+            response.injectionData(apiResponse.getBody());
+            return response;
         } catch (HttpClientErrorException e) {
             throw new RuntimeException(e.getMessage());
         }
