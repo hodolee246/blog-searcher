@@ -2,6 +2,7 @@ package com.hodolee.example.searcher.impl;
 
 import com.hodolee.example.searcher.BlogSearcher;
 import com.hodolee.example.searcher.dto.ApiResponseDto;
+import com.hodolee.example.searcher.dto.BlogSearchDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponents;
@@ -29,11 +30,11 @@ public class NaverSeacher implements BlogSearcher {
     @Value("${blog.search.naver.clientSecret}")
     private String clientSecret;
 
-    public ApiResponseDto searchBlog(String query, String sort, Integer page) {
+    public ApiResponseDto searchBlog(final BlogSearchDto blogSearchDto) {
         UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(apiUri)
-                .queryParam("query", query)
-                .queryParam("sort", sort)
-                .queryParam("page", page)
+                .queryParam("query", blogSearchDto.query())
+                .queryParam("sort", blogSearchDto.sort())
+                .queryParam("page", blogSearchDto.page())
                 .build();
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("X-Naver-Client-Id", clientId);

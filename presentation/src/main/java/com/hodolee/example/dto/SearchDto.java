@@ -1,12 +1,12 @@
 package com.hodolee.example.dto;
 
-public record BlogSearchDto(
+public record SearchDto(
         String query,
         Integer page,
         String sort
 ) {
 
-    public BlogSearchDto {
+    public SearchDto {
         if (page == null) {
             page = 1;
         }

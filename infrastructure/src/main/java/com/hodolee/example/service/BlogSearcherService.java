@@ -1,9 +1,8 @@
 package com.hodolee.example.service;
 
-import com.hodolee.example.dto.BlogSearchDto;
 import com.hodolee.example.searcher.BlogSearcher;
 import com.hodolee.example.searcher.dto.ApiResponseDto;
-import lombok.RequiredArgsConstructor;
+import com.hodolee.example.searcher.dto.BlogSearchDto;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +15,8 @@ public class BlogSearcherService {
         this.blogSearcher = blogSearcher;
     }
 
-    public ApiResponseDto getBlog(BlogSearchDto blogSearchDto) {
-        return blogSearcher.searchBlog(blogSearchDto.query(), blogSearchDto.sort(), blogSearchDto.page());
+    public ApiResponseDto getBlog(String query, String sort, Integer page) {
+        return blogSearcher.searchBlog(new BlogSearchDto(query, sort, page));
     }
 
 }

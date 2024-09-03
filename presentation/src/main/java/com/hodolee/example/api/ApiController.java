@@ -1,6 +1,6 @@
 package com.hodolee.example.api;
 
-import com.hodolee.example.dto.BlogSearchDto;
+import com.hodolee.example.dto.SearchDto;
 import com.hodolee.example.searcher.dto.ApiResponseDto;
 import com.hodolee.example.service.BlogSearcherService;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +19,8 @@ public class ApiController {
     }
     
     @GetMapping("/blog")
-    public ResponseEntity<ApiResponseDto> getBlog(final BlogSearchDto blogSearchDto) {
-        return ResponseEntity.ok(blogSearcherService.getBlog(blogSearchDto));
+    public ResponseEntity<ApiResponseDto> getBlog(final SearchDto searchDto) {
+        return ResponseEntity.ok(blogSearcherService.getBlog(searchDto.query(), searchDto.sort(), searchDto.page()));
     }
     
 }
