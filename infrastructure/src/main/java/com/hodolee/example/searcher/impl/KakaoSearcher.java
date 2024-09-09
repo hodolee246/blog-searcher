@@ -1,7 +1,7 @@
 package com.hodolee.example.searcher.impl;
 
 import com.hodolee.example.searcher.BlogSearcher;
-import com.hodolee.example.searcher.dto.ApiResponseDto;
+import com.hodolee.example.searcher.dto.ExternalApiResponseDto;
 import com.hodolee.example.searcher.dto.BlogSearchDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -24,7 +24,7 @@ public class KakaoSearcher implements BlogSearcher {
     @Value("${blog.search.kakao.apiKey}")
     private String apiKey;
 
-    public ApiResponseDto searchBlog(final BlogSearchDto blogSearchDto) {
+    public ExternalApiResponseDto searchBlog(final BlogSearchDto blogSearchDto) {
         UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(apiUri)
                 .queryParam("query", blogSearchDto.query())
                 .queryParam("sort", blogSearchDto.sort())
@@ -41,7 +41,7 @@ public class KakaoSearcher implements BlogSearcher {
                     HttpMethod.GET,
                     entity,
                     String.class);
-            ApiResponseDto response = new ApiResponseDto();
+            ExternalApiResponseDto response = new ExternalApiResponseDto();
             response.injectionData(apiResponse.getBody());
             return response;
         } catch (HttpClientErrorException e) {

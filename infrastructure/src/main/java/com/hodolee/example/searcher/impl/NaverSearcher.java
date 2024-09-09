@@ -1,7 +1,7 @@
 package com.hodolee.example.searcher.impl;
 
 import com.hodolee.example.searcher.BlogSearcher;
-import com.hodolee.example.searcher.dto.ApiResponseDto;
+import com.hodolee.example.searcher.dto.ExternalApiResponseDto;
 import com.hodolee.example.searcher.dto.BlogSearchDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class NaverSeacher implements BlogSearcher {
+public class NaverSearcher implements BlogSearcher {
 
     @Value("${blog.search.naver.apiUri}")
     private String apiUri;
@@ -30,7 +30,7 @@ public class NaverSeacher implements BlogSearcher {
     @Value("${blog.search.naver.clientSecret}")
     private String clientSecret;
 
-    public ApiResponseDto searchBlog(final BlogSearchDto blogSearchDto) {
+    public ExternalApiResponseDto searchBlog(final BlogSearchDto blogSearchDto) {
         UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(apiUri)
                 .queryParam("query", blogSearchDto.query())
                 .queryParam("sort", blogSearchDto.sort())
@@ -40,7 +40,7 @@ public class NaverSeacher implements BlogSearcher {
         requestHeaders.put("X-Naver-Client-Id", clientId);
         requestHeaders.put("X-Naver-Client-Secret", clientSecret);
         String apiResponse = get(uriComponents.toUri().toString(), requestHeaders);
-        ApiResponseDto response = new ApiResponseDto();
+        ExternalApiResponseDto response = new ExternalApiResponseDto();
         response.injectionData(apiResponse);
         return response;
     }

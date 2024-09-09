@@ -18,6 +18,18 @@ spring:
     console:
       enabled: true
 
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState : 10s
+    instances:
+      caller:
+        baseConfig: default
+
+#external data
 blog:
   search:
     kakao:
