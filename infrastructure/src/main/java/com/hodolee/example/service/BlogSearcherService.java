@@ -16,15 +16,19 @@ public class BlogSearcherService {
 
     private final BlogSearcher kakaoSearcher;
     private final BlogSearcher naverSearcher;
+    private final SearchHistoryService searchHistoryService;
 
     public BlogSearcherService(@Qualifier("kakaoSearcher") BlogSearcher kakaoSearcher,
-                               @Qualifier("naverSearcher") BlogSearcher naverSeacher) {
+                               @Qualifier("naverSearcher") BlogSearcher naverSeacher,
+                               SearchHistoryService searchHistoryService) {
         this.kakaoSearcher = kakaoSearcher;
         this.naverSearcher = naverSeacher;
+        this.searchHistoryService = searchHistoryService;
     }
 
     @CircuitBreaker(name = "caller", fallbackMethod = "getNaverBlog")
     public ExternalApiResponseDto getKakaoBlog(String query, String sort, Integer page) {
+        searchHistoryService.saveSearchHistory(query);
         return kakaoSearcher.searchBlog(new BlogSearchDto(query, sort, page));
     }
 
@@ -35,6 +39,7 @@ public class BlogSearcherService {
         } else {
             sort = "date";
         }
+        searchHistoryService.saveSearchHistory(query);
         return naverSearcher.searchBlog(new BlogSearchDto(query, sort, page));
     }
 

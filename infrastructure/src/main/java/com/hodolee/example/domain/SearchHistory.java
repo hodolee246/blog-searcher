@@ -9,8 +9,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -23,6 +21,10 @@ public class SearchHistory extends BaseEntity {
     private String keyword;
 
     private int count;
+
+    public void incrementCount() {
+        this.count = this.count + 1;
+    }
 
     @Builder
     public SearchHistory(Long idx, String keyword, int count) {
