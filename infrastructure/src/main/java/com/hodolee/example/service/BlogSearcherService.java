@@ -1,35 +1,27 @@
 package com.hodolee.example.service;
 
-import com.hodolee.example.searcher.BlogSearcher;
-import com.hodolee.example.searcher.dto.ExternalApiResponseDto;
+import com.hodolee.example.searcher.KakaoBlogSearcher;
+import com.hodolee.example.searcher.NaverBlogSearcher;
 import com.hodolee.example.searcher.dto.BlogSearchDto;
+import com.hodolee.example.searcher.dto.ExternalApiResponseDto;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.Random;
-
-@Service
 @Slf4j
+@RequiredArgsConstructor
+@Service
 public class BlogSearcherService {
 
-    private final BlogSearcher kakaoSearcher;
-    private final BlogSearcher naverSearcher;
+    private final KakaoBlogSearcher kakaoBlogSearcher;
+    private final NaverBlogSearcher naverBlogSearcher;
     private final SearchHistoryService searchHistoryService;
-
-    public BlogSearcherService(@Qualifier("kakaoSearcher") BlogSearcher kakaoSearcher,
-                               @Qualifier("naverSearcher") BlogSearcher naverSeacher,
-                               SearchHistoryService searchHistoryService) {
-        this.kakaoSearcher = kakaoSearcher;
-        this.naverSearcher = naverSeacher;
-        this.searchHistoryService = searchHistoryService;
-    }
 
     @CircuitBreaker(name = "caller", fallbackMethod = "getNaverBlog")
     public ExternalApiResponseDto getKakaoBlog(String query, String sort, Integer page) {
         searchHistoryService.saveSearchHistory(query);
-        return kakaoSearcher.searchBlog(new BlogSearchDto(query, sort, page));
+        return kakaoBlogSearcher.searchBlog(new BlogSearchDto(query, sort, page));
     }
 
     private ExternalApiResponseDto getNaverBlog(String query, String sort, Integer page, Throwable t) {
@@ -40,7 +32,7 @@ public class BlogSearcherService {
             sort = "date";
         }
         searchHistoryService.saveSearchHistory(query);
-        return naverSearcher.searchBlog(new BlogSearchDto(query, sort, page));
+        return naverBlogSearcher.searchBlog(new BlogSearchDto(query, sort, page));
     }
 
 }

@@ -18,6 +18,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'io.github.resilience4j:resilience4j-spring-boot2:2.0.2'
     implementation 'io.github.resilience4j:resilience4j-all:2.0.2'
+    implementation platform("org.springframework.cloud:spring-cloud-dependencies:2022.0.5")
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
