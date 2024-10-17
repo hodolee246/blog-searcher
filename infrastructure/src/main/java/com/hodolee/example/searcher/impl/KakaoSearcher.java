@@ -14,7 +14,7 @@ public class KakaoSearcher {
     private final KakaoBlogSearcher kakaoBlogSearcher;
 
     public ExternalApiResponseDto searchBlog(final BlogSearchDto blogSearchDto) {
-        return kakaoBlogSearcher.searchBlog(blogSearchDto);
+        return kakaoBlogSearcher.searchBlog(blogSearchDto.query(), blogSearchDto.sort(), blogSearchDto.page());
     }
 
 }
