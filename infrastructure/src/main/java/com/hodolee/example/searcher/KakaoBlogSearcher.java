@@ -1,6 +1,5 @@
 package com.hodolee.example.searcher;
 
-import com.hodolee.example.searcher.dto.BlogSearchDto;
 import com.hodolee.example.searcher.dto.ExternalApiResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

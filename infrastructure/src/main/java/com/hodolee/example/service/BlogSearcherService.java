@@ -1,7 +1,8 @@
 package com.hodolee.example.service;
 
+//import com.hodolee.example.searcher.KakaoBlogSearcher;
+//import com.hodolee.example.searcher.NaverBlogSearcher;
 import com.hodolee.example.searcher.KakaoBlogSearcher;
-import com.hodolee.example.searcher.NaverBlogSearcher;
 import com.hodolee.example.searcher.dto.BlogSearchDto;
 import com.hodolee.example.searcher.dto.ExternalApiResponseDto;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -18,10 +19,11 @@ public class BlogSearcherService {
 //    private final NaverBlogSearcher naverBlogSearcher;
     private final SearchHistoryService searchHistoryService;
 
-//    @CircuitBreaker(name = "caller", fallbackMethod = "getNaverBlog")
+    @CircuitBreaker(name = "caller", fallbackMethod = "getNaverBlog")
     public ExternalApiResponseDto getKakaoBlog(String query, String sort, Integer page) {
         searchHistoryService.saveSearchHistory(query);
-        return kakaoBlogSearcher.searchBlog(query, sort, page);
+        return null;
+//        return kakaoBlogSearcher.searchBlog(query, sort, page);
     }
 
 //    private ExternalApiResponseDto getNaverBlog(String query, String sort, Integer page, Throwable t) {

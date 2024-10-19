@@ -18,6 +18,10 @@ spring:
     console:
       enabled: true
 
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
 resilience4j:
   circuitbreaker:
     configs:
