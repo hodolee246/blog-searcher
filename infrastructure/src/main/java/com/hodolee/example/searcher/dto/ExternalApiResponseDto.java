@@ -1,17 +1,16 @@
 package com.hodolee.example.searcher.dto;
 
 import lombok.Getter;
+import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 public class ExternalApiResponseDto {
 
-    private Map<String, Object> response = new HashMap<>();
-
-    public void injectionData(Object data) {
-        this.response.put("response", data);
-    }
+    private final List<BlogDto> blogs = new ArrayList<>();
+    @Setter
+    private MetaData meta;
 
 }

@@ -1,8 +1,12 @@
 package com.hodolee.example.searcher.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hodolee.example.searcher.BlogSearcher;
+import com.hodolee.example.searcher.dto.BlogDto;
 import com.hodolee.example.searcher.dto.ExternalApiResponseDto;
 import com.hodolee.example.searcher.dto.BlogSearchDto;
+import com.hodolee.example.searcher.dto.MetaData;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponents;
@@ -40,8 +44,34 @@ public class NaverSearcher implements BlogSearcher {
         requestHeaders.put("X-Naver-Client-Id", clientId);
         requestHeaders.put("X-Naver-Client-Secret", clientSecret);
         String apiResponse = get(uriComponents.toUri().toString(), requestHeaders);
+
         ExternalApiResponseDto response = new ExternalApiResponseDto();
-        response.injectionData(apiResponse);
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(apiResponse);
+            JsonNode items = jsonNode.get("items");
+            if (items != null && items.isArray()) {
+                for (JsonNode item : items) {
+                    BlogDto blogDto = new BlogDto(
+                            item.get("title").asText(),
+                            item.get("description").asText(),
+                            item.get("link").asText(),
+                            item.get("bloggername").asText(),
+                            item.get("postdate").asText()
+                    );
+                    response.getBlogs().add(blogDto);
+                }
+            }
+            MetaData meta = new MetaData(
+                    jsonNode.get("total").asInt(),
+                    null,
+                    null
+            );
+            response.setMeta(meta);
+        } catch (IOException e) {
+            throw new RuntimeException("네이버 API 응답 파싱 실패", e);
+        }
         return response;
     }
 

@@ -1,8 +1,10 @@
 package com.hodolee.example.searcher.impl;
 
 import com.hodolee.example.searcher.BlogSearcher;
+import com.hodolee.example.searcher.dto.BlogDto;
 import com.hodolee.example.searcher.dto.ExternalApiResponseDto;
 import com.hodolee.example.searcher.dto.BlogSearchDto;
+import com.hodolee.example.searcher.dto.MetaData;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -36,23 +38,18 @@ public class KakaoSearcher implements BlogSearcher {
 
         try {
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> apiResponse = restTemplate.exchange(
+            ResponseEntity<BlogDto> apiResponse = restTemplate.exchange(
                     uriComponents.encode().toUri(),
                     HttpMethod.GET,
                     entity,
-                    String.class);
+                    BlogDto.class);
             ExternalApiResponseDto response = new ExternalApiResponseDto();
-            response.injectionData(apiResponse.getBody());
+            response.getBlogs().add(apiResponse.getBody());
+
             return response;
         } catch (HttpClientErrorException e) {
             throw new RuntimeException(e.getMessage());
         }
-    }
-
-    private String get(String apiUrl, HttpHeaders headers) {
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        RestTemplate restTemplate = new RestTemplate();
-        return restTemplate.exchange(apiUrl, HttpMethod.GET, entity, String.class).getBody();
     }
 
 }
