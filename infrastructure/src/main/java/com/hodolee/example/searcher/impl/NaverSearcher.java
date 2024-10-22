@@ -1,5 +1,6 @@
 package com.hodolee.example.searcher.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hodolee.example.searcher.BlogSearcher;
@@ -19,7 +20,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -45,34 +48,34 @@ public class NaverSearcher implements BlogSearcher {
         requestHeaders.put("X-Naver-Client-Secret", clientSecret);
         String apiResponse = get(uriComponents.toUri().toString(), requestHeaders);
 
-        ExternalApiResponseDto response = new ExternalApiResponseDto();
-
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(apiResponse);
-            JsonNode items = jsonNode.get("items");
-            if (items != null && items.isArray()) {
-                for (JsonNode item : items) {
-                    BlogDto blogDto = new BlogDto(
-                            item.get("title").asText(),
-                            item.get("description").asText(),
-                            item.get("link").asText(),
-                            item.get("bloggername").asText(),
-                            item.get("postdate").asText()
-                    );
-                    response.getBlogs().add(blogDto);
-                }
-            }
-            MetaData meta = new MetaData(
-                    jsonNode.get("total").asInt(),
-                    null,
-                    null
+            JsonNode node = objectMapper.readTree(apiResponse);
+            MetaData metaData = new MetaData(
+                    node.get("total").asInt(),
+                    node.get("pageable_count").asInt(),
+                    node.get("is_end").asBoolean()
             );
-            response.setMeta(meta);
-        } catch (IOException e) {
-            throw new RuntimeException("네이버 API 응답 파싱 실패", e);
+
+            List<BlogDto> blogs = new ArrayList<>();
+            for (JsonNode item : node.get("items")) {
+                BlogDto blogDto = new BlogDto(
+                        item.get("title").asText(),
+                        item.get("description").asText(),
+                        item.get("link").asText(),
+                        item.get("bloggername").asText(),
+                        item.get("postdate").asText()
+                );
+                blogs.add(blogDto);
+            }
+            ExternalApiResponseDto responseDto = new ExternalApiResponseDto();
+            responseDto.setMeta(metaData);
+            responseDto.getBlogs().addAll(blogs);
+
+            return responseDto;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("API Parse Error", e);
         }
-        return response;
     }
 
     private String get(String apiUrl, Map<String, String> requestHeaders) {
@@ -84,9 +87,9 @@ public class NaverSearcher implements BlogSearcher {
             }
 
             int responseCode = con.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) { // 정상 호출
+            if (responseCode == HttpURLConnection.HTTP_OK) {
                 return readBody(con.getInputStream());
-            } else { // 오류 발생
+            } else {
                 return readBody(con.getErrorStream());
             }
         } catch (IOException e) {
