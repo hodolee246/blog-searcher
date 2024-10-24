@@ -2,6 +2,7 @@ package com.hodolee.example.api;
 
 import com.hodolee.example.dto.ApiResponseDto;
 import com.hodolee.example.dto.SearchDto;
+import com.hodolee.example.searcher.dto.ExternalApiResponseDto;
 import com.hodolee.example.service.BlogSearcherService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,8 +22,8 @@ public class ApiController {
     }
     
     @GetMapping("/blog")
-    public ResponseEntity<ApiResponseDto> getBlog(final SearchDto searchDto) {
-        return ResponseEntity.ok(new ApiResponseDto(blogSearcherService.getKakaoBlog(searchDto.query(), searchDto.sort(), searchDto.page()).getResponse()));
+    public ResponseEntity<ExternalApiResponseDto> getBlog(final SearchDto searchDto) {
+        return ResponseEntity.ok(blogSearcherService.getKakaoBlog(searchDto.query(), searchDto.sort(), searchDto.page()));
     }
     
 }

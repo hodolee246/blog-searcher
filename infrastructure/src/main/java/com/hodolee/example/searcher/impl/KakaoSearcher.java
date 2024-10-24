@@ -44,7 +44,12 @@ public class KakaoSearcher implements BlogSearcher {
                     entity,
                     BlogDto.class);
             ExternalApiResponseDto response = new ExternalApiResponseDto();
-            response.getBlogs().add(apiResponse.getBody());
+            BlogDto blogDto = apiResponse.getBody();
+
+            if (blogDto != null) {
+                response.getBlogs().add(blogDto);
+            }
+
             return response;
         } catch (HttpClientErrorException e) {
             throw new RuntimeException("API Parse Error", e);
