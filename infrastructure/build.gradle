@@ -22,6 +22,10 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     testImplementation 'com.h2database:h2:2.1.214'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    testImplementation 'org.mockito:mockito-core:5.5.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.5.0'
 }
 
 configurations {
@@ -39,7 +43,7 @@ querydsl {
 }
 
 sourceSets {
-    main.java.srcDir querydslDir
+    main.java.srcDirs += querydslDir
 }
 
 compileQuerydsl {
