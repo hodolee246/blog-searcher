@@ -1,4 +1,21 @@
 package com.hodolee.example.searcher.dto;
 
-public record BlogSearchDto(String query, String sort, Integer page) {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class BlogSearchDto {
+    private String query;
+    private String sort;
+    private Integer page;
+
+    public void convertNaverApi() {
+        if ("accuracy".equals(sort)) {
+            sort = "sim";
+        } else {
+            sort = "date";
+        }
+    }
+
 }

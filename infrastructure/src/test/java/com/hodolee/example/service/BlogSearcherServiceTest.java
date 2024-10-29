@@ -1,8 +1,9 @@
 package com.hodolee.example.service;
 
-import com.hodolee.example.searcher.BlogSearcher;
 import com.hodolee.example.searcher.dto.BlogSearchDto;
-import com.hodolee.example.searcher.dto.ExternalApiResponseDto;
+import com.hodolee.example.searcher.dto.ExternalApiResponse;
+import com.hodolee.example.searcher.impl.KakaoSearcher;
+import com.hodolee.example.searcher.impl.NaverSearcher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -21,10 +22,10 @@ public class BlogSearcherServiceTest {
     private SearchHistoryService searchHistoryService;
 
     @Mock
-    private BlogSearcher kakaoSearcher;
+    private KakaoSearcher kakaoSearcher;
 
     @Mock
-    private BlogSearcher naverSearcher;
+    private NaverSearcher naverSearcher;
 
     @InjectMocks
     private BlogSearcherService blogSearcherService;
@@ -35,7 +36,7 @@ public class BlogSearcherServiceTest {
         doThrow(new RuntimeException("예외 발생"))
                 .when(kakaoSearcher).searchBlog(any(BlogSearchDto.class));
 
-        ExternalApiResponseDto response = blogSearcherService.getKakaoBlog("테스트 쿼리", "accuracy", 1);
+        ExternalApiResponse response = blogSearcherService.getKakaoBlog("테스트 쿼리", "accuracy", 1);
 
         Mockito.verify(naverSearcher).searchBlog(any(BlogSearchDto.class));
         assertThat(response).isNotNull();

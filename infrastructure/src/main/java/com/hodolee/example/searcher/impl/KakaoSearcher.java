@@ -1,10 +1,9 @@
 package com.hodolee.example.searcher.impl;
 
 import com.hodolee.example.searcher.BlogSearcher;
-import com.hodolee.example.searcher.dto.BlogDto;
-import com.hodolee.example.searcher.dto.ExternalApiResponseDto;
 import com.hodolee.example.searcher.dto.BlogSearchDto;
-import com.hodolee.example.searcher.dto.MetaData;
+import com.hodolee.example.searcher.dto.ExternalApiResponse;
+import com.hodolee.example.searcher.dto.kakao.KakaoApiResponseDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,11 +25,11 @@ public class KakaoSearcher implements BlogSearcher {
     @Value("${blog.search.kakao.apiKey}")
     private String apiKey;
 
-    public ExternalApiResponseDto searchBlog(final BlogSearchDto blogSearchDto) {
+    public ExternalApiResponse searchBlog(final BlogSearchDto blogSearchDto) {
         UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(apiUri)
-                .queryParam("query", blogSearchDto.query())
-                .queryParam("sort", blogSearchDto.sort())
-                .queryParam("page", blogSearchDto.page())
+                .queryParam("query", blogSearchDto.getQuery())
+                .queryParam("sort", blogSearchDto.getSort())
+                .queryParam("page", blogSearchDto.getPage())
                 .build();
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, "KakaoAK " + apiKey);
@@ -38,22 +37,17 @@ public class KakaoSearcher implements BlogSearcher {
 
         try {
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<BlogDto> apiResponse = restTemplate.exchange(
+            ResponseEntity<KakaoApiResponseDto> apiResponse = restTemplate.exchange(
                     uriComponents.encode().toUri(),
                     HttpMethod.GET,
                     entity,
-                    BlogDto.class);
-            ExternalApiResponseDto response = new ExternalApiResponseDto();
-            BlogDto blogDto = apiResponse.getBody();
+                    KakaoApiResponseDto.class);
 
-            if (blogDto != null) {
-                response.getBlogs().add(blogDto);
-            }
-
-            return response;
+            return ExternalApiResponse.builder()
+                    .kakaoApiResponseDto(apiResponse.getBody())
+                    .build();
         } catch (HttpClientErrorException e) {
             throw new RuntimeException("API Parse Error", e);
         }
     }
-
 }
