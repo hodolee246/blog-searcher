@@ -1,5 +1,6 @@
 package com.hodolee.example.service;
 
+import com.hodolee.example.searcher.BlogSearcher;
 import com.hodolee.example.searcher.dto.BlogSearchDto;
 import com.hodolee.example.searcher.dto.ExternalApiResponse;
 import com.hodolee.example.searcher.impl.KakaoSearcher;
@@ -22,10 +23,10 @@ public class BlogSearcherServiceTest {
     private SearchHistoryService searchHistoryService;
 
     @Mock
-    private KakaoSearcher kakaoSearcher;
+    private BlogSearcher kakaoSearcher;
 
     @Mock
-    private NaverSearcher naverSearcher;
+    private BlogSearcher naverSearcher;
 
     @InjectMocks
     private BlogSearcherService blogSearcherService;

@@ -1,5 +1,8 @@
 package com.hodolee.example.searcher.dto.kakao;
 
+import lombok.Builder;
+
+@Builder
 public record KakaoInfo(
         String title,
         String contents,
