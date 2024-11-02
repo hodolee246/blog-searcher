@@ -4,21 +4,18 @@ import com.hodolee.example.dto.SearchDto;
 import com.hodolee.example.searcher.dto.ExternalApiResponse;
 import com.hodolee.example.searcher.dto.kakao.KakaoApiResponseDto;
 import com.hodolee.example.searcher.dto.kakao.KakaoInfo;
-import com.hodolee.example.searcher.dto.naver.NaverBlogResponseDto;
 import com.hodolee.example.service.BlogSearcherService;
+import com.hodolee.example.service.SearchHistoryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -26,11 +23,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ApiController.class)
 class ApiControllerTest {
 
-    @Autowired
-    MockMvc mvc;
-
     @MockBean
     BlogSearcherService blogSearcherService;
+    @MockBean
+    SearchHistoryService searchHistoryService;
     @Autowired
     private MockMvc mockMvc;
 
