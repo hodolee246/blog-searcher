@@ -39,12 +39,14 @@ public class BlogSearcherService {
         }
 
         searchHistoryService.saveSearchHistory(query);
+        log.info("kakao searcher: {} / {} / {}", query, sort, page);
         ExternalApiResponse response = kakaoSearcher.searchBlog(new BlogSearchDto(query, sort, page));
         saveToCache("blogSearchCache:kakao", query, response);
         return response;
     }
 
     private ExternalApiResponse getNaverBlog(String query, String sort, Integer page, Throwable t) {
+        log.info("circuit break / message : {}", t.getMessage());
         ExternalApiResponse cachedResponse = getCachedResponse(query);
         if (cachedResponse != null) {
             log.info("getNaverBlog() / query: {}", query);
@@ -54,6 +56,7 @@ public class BlogSearcherService {
         searchHistoryService.saveSearchHistory(query);
         BlogSearchDto blogSearchDto = new BlogSearchDto(query, sort, page);
         blogSearchDto.convertNaverApi();
+        log.info("naver searcher: {}", blogSearchDto);
         ExternalApiResponse response = naverSearcher.searchBlog(blogSearchDto);
         saveToCache("blogSearchCache:naver", query, response);
         return response;
@@ -66,7 +69,7 @@ public class BlogSearcherService {
             return kakaoCache;
         }
 
-        return Objects.requireNonNull(cacheManager.getCache("blogSearchCache:kakao"))
+        return Objects.requireNonNull(cacheManager.getCache("blogSearchCache:naver"))
                 .get(query, ExternalApiResponse.class);
     }
 
