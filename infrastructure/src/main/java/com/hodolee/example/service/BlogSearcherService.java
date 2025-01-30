@@ -3,12 +3,15 @@ package com.hodolee.example.service;
 import com.hodolee.example.searcher.BlogSearcher;
 import com.hodolee.example.searcher.dto.BlogSearchDto;
 import com.hodolee.example.searcher.dto.ExternalApiResponse;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -20,15 +23,30 @@ public class BlogSearcherService {
     private final BlogSearcher naverSearcher;
     private final SearchHistoryService searchHistoryService;
     private final CacheManager cacheManager;
+    private final CircuitBreakerRegistry circuitBreakerRegistry;
 
     public BlogSearcherService(@Qualifier("kakaoSearcher") BlogSearcher kakaoSearcher,
                                @Qualifier("naverSearcher") BlogSearcher naverSeacher,
                                SearchHistoryService searchHistoryService,
-                               CacheManager cacheManager) {
+                               CacheManager cacheManager,
+                               CircuitBreakerRegistry circuitBreakerRegistry) {
         this.kakaoSearcher = kakaoSearcher;
         this.naverSearcher = naverSeacher;
         this.searchHistoryService = searchHistoryService;
         this.cacheManager = cacheManager;
+        this.circuitBreakerRegistry = circuitBreakerRegistry;
+    }
+
+    @Scheduled(fixedRate = 60000)
+    public void preCache() {
+        List<String> popularKeywords = searchHistoryService.getTopKeyword(10);
+
+        for (String query : popularKeywords) {
+            CompletableFuture.runAsync(() -> {
+                ExternalApiResponse response = kakaoSearcher.searchBlog(new BlogSearchDto(query, "accuracy", 1));
+                saveToCache("blogSearchCache:kakao", query, response);
+            });
+        }
     }
 
     @CircuitBreaker(name = "caller", fallbackMethod = "getNaverBlog")

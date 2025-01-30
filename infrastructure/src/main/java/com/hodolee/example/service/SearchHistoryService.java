@@ -8,6 +8,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -39,4 +40,9 @@ public class SearchHistoryService {
             lock.unlock();
         }
     }
+
+    public List<String> getTopKeyword(int limit) {
+        return searchHistoryRepository.findTopKeyword(limit);
+    }
+
 }
