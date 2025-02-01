@@ -6,6 +6,8 @@ import com.hodolee.example.searcher.dto.ExternalApiResponse;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -23,18 +26,18 @@ public class BlogSearcherService {
     private final BlogSearcher naverSearcher;
     private final SearchHistoryService searchHistoryService;
     private final CacheManager cacheManager;
-    private final CircuitBreakerRegistry circuitBreakerRegistry;
+    private final RedissonClient redissonClient;
 
     public BlogSearcherService(@Qualifier("kakaoSearcher") BlogSearcher kakaoSearcher,
                                @Qualifier("naverSearcher") BlogSearcher naverSeacher,
                                SearchHistoryService searchHistoryService,
                                CacheManager cacheManager,
-                               CircuitBreakerRegistry circuitBreakerRegistry) {
+                               RedissonClient redissonClient) {
         this.kakaoSearcher = kakaoSearcher;
         this.naverSearcher = naverSeacher;
         this.searchHistoryService = searchHistoryService;
         this.cacheManager = cacheManager;
-        this.circuitBreakerRegistry = circuitBreakerRegistry;
+        this.redissonClient = redissonClient;
     }
 
     @Scheduled(fixedRate = 60000)
@@ -51,24 +54,39 @@ public class BlogSearcherService {
 
     @CircuitBreaker(name = "caller", fallbackMethod = "getNaverBlog")
     public ExternalApiResponse getKakaoBlog(String query, String sort, Integer page) {
-        ExternalApiResponse cachedResponse = getCachedResponse("kakao", query, sort, page);
-        if (cachedResponse != null) {
-            log.info("getKakaoBlog() / query: {}", query);
-            return cachedResponse;
-        }
+        String lockKey = "blogSearchLock:" + query;
+        RLock lock = redissonClient.getLock(lockKey);
 
-        searchHistoryService.saveSearchHistory(query);
-        log.info("kakao searcher: {} / {} / {}", query, sort, page);
-        ExternalApiResponse response = kakaoSearcher.searchBlog(new BlogSearchDto(query, sort, page));
-        saveToCache("blogSearchCache:kakao", query, response);
-        return response;
+        try {
+            if (lock.tryLock(5, 10, TimeUnit.SECONDS)) {
+                ExternalApiResponse cachedResponse = getCachedResponse("kakao", query, sort, page);
+                if (cachedResponse != null) {
+                    return cachedResponse;
+                }
+
+                ExternalApiResponse response = kakaoSearcher.searchBlog(new BlogSearchDto(query, sort, page));
+                saveToCache("blogSearchCache:kakao", query, response);
+                return response;
+            } else {
+                // 락을 획득하지 못한 경우 (다른 요청이 이미 동일한 검색어를 요청한 경우)
+                log.info("already query in cache : {}", query);
+                return getCachedResponse("kakao", query, sort, page);
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException("redis Lock error", e);
+        } finally {
+            // 현재 스레드가 락을 가지고 있을경우만 해제
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 
     private ExternalApiResponse getNaverBlog(String query, String sort, Integer page, Throwable t) {
-        log.info("circuit break / message : {}", t.getMessage());
+        log.info("circuit break message : {}", t.getMessage());
         ExternalApiResponse cachedResponse = getCachedResponse("naver", query, sort, page);
         if (cachedResponse != null) {
-            log.info("getNaverBlog() / query: {}", query);
+            log.info("getNaverBlog() query: {}", query);
             return cachedResponse;
         }
 
