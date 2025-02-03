@@ -22,12 +22,12 @@ resilience4j:
   circuitbreaker:
     configs:
       default:
-        slidingWindowSize: 10
-        failureRateThreshold: 50
-        waitDurationInOpenState : 10s
+        slidingWindowSize: 10  # 최근 10개 요청을 기준으로 실패율을 계산
+        failureRateThreshold: 50  # 50% 이상 실패하면 서킷 오픈
+        waitDurationInOpenState: 10s  # 서킷이 열린 후 10초 동안 닫히지 않고 대기
     instances:
       caller:
-        baseConfig: default
+        baseConfig: default  # 위에서 정의한 default 설정을 적용
 
 #external data
 blog:
