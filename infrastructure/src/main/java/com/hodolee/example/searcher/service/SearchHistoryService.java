@@ -1,4 +1,4 @@
-package com.hodolee.example.service;
+package com.hodolee.example.searcher.service;
 
 import com.hodolee.example.domain.SearchHistory;
 import com.hodolee.example.domain.SearchHistoryRepository;

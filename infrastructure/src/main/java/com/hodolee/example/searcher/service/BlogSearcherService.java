@@ -1,9 +1,9 @@
-package com.hodolee.example.service;
+package com.hodolee.example.searcher.service;
 
+import com.hodolee.example.kafka.KafkaProducerService;
 import com.hodolee.example.searcher.BlogSearcher;
 import com.hodolee.example.searcher.dto.BlogSearchDto;
 import com.hodolee.example.searcher.dto.ExternalApiResponse;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -27,17 +27,19 @@ public class BlogSearcherService {
     private final SearchHistoryService searchHistoryService;
     private final CacheManager cacheManager;
     private final RedissonClient redissonClient;
+    private final KafkaProducerService kafkaProducerService;
 
     public BlogSearcherService(@Qualifier("kakaoSearcher") BlogSearcher kakaoSearcher,
                                @Qualifier("naverSearcher") BlogSearcher naverSeacher,
                                SearchHistoryService searchHistoryService,
                                CacheManager cacheManager,
-                               RedissonClient redissonClient) {
+                               RedissonClient redissonClient, KafkaProducerService kafkaProducerService) {
         this.kakaoSearcher = kakaoSearcher;
         this.naverSearcher = naverSeacher;
         this.searchHistoryService = searchHistoryService;
         this.cacheManager = cacheManager;
         this.redissonClient = redissonClient;
+        this.kafkaProducerService = kafkaProducerService;
     }
 
     @Scheduled(fixedRate = 60000)
@@ -56,7 +58,7 @@ public class BlogSearcherService {
     public ExternalApiResponse getKakaoBlog(String query, String sort, Integer page) {
         String lockKey = "blogSearchLock:" + query;
         RLock lock = redissonClient.getLock(lockKey);
-
+        kafkaProducerService.sendSearchKeyword(query);
         try {
             if (lock.tryLock(5, 10, TimeUnit.SECONDS)) {
                 ExternalApiResponse cachedResponse = getCachedResponse("kakao", query, sort, page);
@@ -90,7 +92,7 @@ public class BlogSearcherService {
             return cachedResponse;
         }
 
-        searchHistoryService.saveSearchHistory(query);
+        kafkaProducerService.sendSearchKeyword(query);
         BlogSearchDto blogSearchDto = new BlogSearchDto(query, sort, page);
         blogSearchDto.convertNaverApi();
         log.info("naver searcher: {}", blogSearchDto);

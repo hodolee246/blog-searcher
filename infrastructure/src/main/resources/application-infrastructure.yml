@@ -43,3 +43,16 @@ blog:
 
 redis:
   address: redis://localhost:6379
+
+  kafka:
+    bootstrap-servers: localhost:9092  # Kafka 브로커 서버
+    producer:
+      retries: 3  # 메시지 전송 실패 시 재시도 횟수
+      acks: all  # 메시지가 정상적으로 처리되었는지 확인하는 옵션
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: search-history-group  # Consumer가 속한 그룹 ID
+      auto-offset-reset: earliest  # Consumer가 처리할 메시지의 시작 지점 설정 (earliest: 처음부터)
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer

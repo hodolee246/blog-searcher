@@ -2,7 +2,7 @@ package com.hodolee.example.api;
 
 import com.hodolee.example.dto.SearchDto;
 import com.hodolee.example.searcher.dto.ExternalApiResponse;
-import com.hodolee.example.service.BlogSearcherService;
+import com.hodolee.example.searcher.service.BlogSearcherService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
