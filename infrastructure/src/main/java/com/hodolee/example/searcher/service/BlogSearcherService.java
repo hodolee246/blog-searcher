@@ -15,8 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Slf4j
 @Service
@@ -28,6 +27,7 @@ public class BlogSearcherService {
     private final CacheManager cacheManager;
     private final RedissonClient redissonClient;
     private final KafkaProducerService kafkaProducerService;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
     public BlogSearcherService(@Qualifier("kakaoSearcher") BlogSearcher kakaoSearcher,
                                @Qualifier("naverSearcher") BlogSearcher naverSeacher,
@@ -66,8 +66,18 @@ public class BlogSearcherService {
                     return cachedResponse;
                 }
 
-                ExternalApiResponse response = kakaoSearcher.searchBlog(new BlogSearchDto(query, sort, page));
-                saveToCache("blogSearchCache:kakao", query, response);
+                // 두 API를 병렬로 호출 후 먼저 반환되는 서비스 반환
+                CompletableFuture<ExternalApiResponse> kakaoFuture = CompletableFuture.supplyAsync(
+                        () -> kakaoSearcher.searchBlog(new BlogSearchDto(query, sort, page)), executorService);
+
+                CompletableFuture<ExternalApiResponse> naverFuture = CompletableFuture.supplyAsync(
+                        () -> {
+                            BlogSearchDto blogSearchDto = new BlogSearchDto(query, sort, page);
+                            blogSearchDto.convertNaverApi();
+                            return naverSearcher.searchBlog(blogSearchDto);
+                        }, executorService);
+                ExternalApiResponse response = CompletableFuture.anyOf(kakaoFuture, naverFuture).thenApply(ExternalApiResponse.class::cast).get();
+                saveToCache("blogSearchCache", query, response);
                 return response;
             } else {
                 // 락을 획득하지 못한 경우 (다른 요청이 이미 동일한 검색어를 요청한 경우)
@@ -76,6 +86,8 @@ public class BlogSearcherService {
             }
         } catch (InterruptedException e) {
             throw new RuntimeException("redis Lock error", e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException("completableFuture error", e);
         } finally {
             // 현재 스레드가 락을 가지고 있을경우만 해제
             if (lock.isHeldByCurrentThread()) {
