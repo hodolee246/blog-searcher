@@ -31,9 +31,10 @@ public class BlogSearcherService {
 
     public BlogSearcherService(@Qualifier("kakaoSearcher") BlogSearcher kakaoSearcher,
                                @Qualifier("naverSearcher") BlogSearcher naverSeacher,
-                               SearchHistoryService searchHistoryService,
                                CacheManager cacheManager,
-                               RedissonClient redissonClient, KafkaProducerService kafkaProducerService) {
+                               SearchHistoryService searchHistoryService,
+                               RedissonClient redissonClient,
+                               KafkaProducerService kafkaProducerService) {
         this.kakaoSearcher = kakaoSearcher;
         this.naverSearcher = naverSeacher;
         this.searchHistoryService = searchHistoryService;
@@ -115,7 +116,7 @@ public class BlogSearcherService {
 
     private ExternalApiResponse getCachedResponse(String blog, String query, String sort, Integer page) {
         if ("kakao".equals(blog)) {
-            ExternalApiResponse kakaoCache = cacheManager.getCache("blogSearchCache:kakao")
+            ExternalApiResponse kakaoCache = Objects.requireNonNull(cacheManager.getCache("blogSearchCache:kakao"))
                     .get(query, ExternalApiResponse.class);
             if (kakaoCache != null) {
                 CompletableFuture.runAsync(() -> {
@@ -125,11 +126,13 @@ public class BlogSearcherService {
                 return kakaoCache;
             }
         } else {
-            ExternalApiResponse naverCache = cacheManager.getCache("blogSearchCache:naver")
+            ExternalApiResponse naverCache = Objects.requireNonNull(cacheManager.getCache("blogSearchCache:naver"))
                     .get(query, ExternalApiResponse.class);
             if (naverCache != null) {
                 CompletableFuture.runAsync(() -> {
-                    ExternalApiResponse updatedResponse = kakaoSearcher.searchBlog(new BlogSearchDto(query, sort, page));
+                    BlogSearchDto dto = new BlogSearchDto(query, sort, page);
+                    dto.convertNaverApi();
+                    ExternalApiResponse updatedResponse = naverSearcher.searchBlog(dto);
                     saveToCache("blogSearchCache:naver", query, updatedResponse);
                 });
                 return naverCache;
